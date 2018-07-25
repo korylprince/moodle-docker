@@ -1,0 +1,60 @@
+version: '3.4'
+
+services:
+  db:
+    image: mariadb:10.3
+    networks:
+      - moodle
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/moodle_mysql_pass
+    deploy:
+      mode: replicated
+      replicas: 1
+    secrets:
+      - moodle_mysql_pass
+
+  php-fpm:
+    image: korylprince/moodle-docker-php:v3.5.1
+    networks:
+      - moodle
+    volumes:
+      - moodle_data:/moodledata
+    environment:
+      DB_HOST: db
+      DB_NAME: moodle
+      DB_USER: root
+      DB_PASS_FILE: /run/secrets/moodle_mysql_pass
+      WWW_ROOT: "https://moodle.example.com"
+      CRON_INTERVAL: 1m
+    deploy:
+      mode: replicated
+      replicas: 1
+    secrets:
+      - moodle_mysql_pass
+
+  nginx:
+    image: korylprince/moodle-docker-nginx:v3.5.1
+    ports:
+      - "80:80"
+    networks:
+      - moodle
+    environment:
+      FASTCGI_REMOTE: "php-fpm:9000"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+networks:
+  moodle:
+
+secrets:
+  moodle_mysql_pass:
+    external: true
+
+volumes:
+  mysql_data:
+    name: moodle_mysql_data
+  moodle_data:
+    name: moodle_moodle_data
