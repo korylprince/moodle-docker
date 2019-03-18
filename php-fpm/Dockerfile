@@ -12,7 +12,7 @@ RUN go install github.com/korylprince/fileenv
 RUN go install github.com/korylprince/run-every
 
 # build image
-FROM alpine:3.8
+FROM alpine:3.9
 
 ARG VERSION
 
