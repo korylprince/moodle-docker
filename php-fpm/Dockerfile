@@ -1,18 +1,13 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.16-alpine as builder
 
 RUN apk add --no-cache git
 
-RUN git clone --branch "v1.1" --single-branch --depth 1 \
-    https://github.com/korylprince/fileenv.git /go/src/github.com/korylprince/fileenv
+RUN GO111MODULE=on go get github.com/korylprince/fileenv@v1.1.0
 
-RUN git clone --branch "v1.0" --single-branch --depth 1 \
-    https://github.com/korylprince/run-every.git /go/src/github.com/korylprince/run-every
-
-RUN go install github.com/korylprince/fileenv
-RUN go install github.com/korylprince/run-every
+RUN GO111MODULE=on go get github.com/korylprince/run-every@v1.0.0
 
 # build image
-FROM alpine:3.8
+FROM alpine:3.13
 
 ARG VERSION
 
@@ -34,6 +29,7 @@ RUN apk add --no-cache git php7-cli php7-fpm \
     php7-opcache \
     php7-openssl \
     php7-session \
+    php7-sodium \
     php7-simplexml \
     php7-soap \
     php7-tokenizer \
@@ -41,7 +37,7 @@ RUN apk add --no-cache git php7-cli php7-fpm \
     php7-xmlreader \
     php7-xmlrpc \
     php7-zip \
-    aspell ghostscript graphviz python
+    aspell ghostscript graphviz python3
 
 RUN git clone --branch "$VERSION" --single-branch --depth 1 \
     git://git.moodle.org/moodle.git /moodle && \
@@ -53,7 +49,8 @@ COPY config.php /moodle/
 RUN sed -i -e "s/upload_max_filesize = 2M/upload_max_filesize = 10G/" /etc/php7/php.ini && \
     sed -i -e "s/post_max_size = 8M/post_max_size = 10G/" /etc/php7/php.ini && \
     sed -i -e "s/max_execution_time = 30/max_execution_time = 3600/" /etc/php7/php.ini && \
-    sed -i -e "s/memory_limit = 128M/memory_limit = 1024M/" /etc/php7/php.ini
+    sed -i -e "s/memory_limit = 128M/memory_limit = 1024M/" /etc/php7/php.ini && \
+    sed -i -e "s/;max_input_vars = 1000/max_input_vars = 5000/" /etc/php7/php.ini
 
 RUN mkdir /moodledata && chown nobody:nobody /moodledata
 

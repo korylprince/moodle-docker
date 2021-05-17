@@ -1,14 +1,11 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.16-alpine as builder
 
 RUN apk add --no-cache git
 
-RUN git clone --branch "v1.1" --single-branch --depth 1 \
-    https://github.com/korylprince/fileenv.git /go/src/github.com/korylprince/fileenv
-
-RUN go install github.com/korylprince/fileenv
+RUN GO111MODULE=on go get github.com/korylprince/fileenv@v1.1.0
 
 # build image
-FROM alpine:3.8
+FROM alpine:3.13
 
 ARG VERSION
 
