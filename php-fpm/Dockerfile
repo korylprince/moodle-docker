@@ -1,13 +1,11 @@
-FROM golang:1.16-alpine as builder
+FROM golang:1-alpine as builder
 
-RUN apk add --no-cache git
+RUN go install github.com/korylprince/fileenv@v1.1.0
+RUN go install github.com/korylprince/run-every@v1.0.0
 
-RUN GO111MODULE=on go get github.com/korylprince/fileenv@v1.1.0
-
-RUN GO111MODULE=on go get github.com/korylprince/run-every@v1.0.0
 
 # build image
-FROM alpine:3.13
+FROM alpine:3.15
 
 ARG VERSION
 
