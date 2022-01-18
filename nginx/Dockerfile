@@ -21,7 +21,7 @@ RUN mkdir -p  /run/nginx && \
     ln -sfT /dev/stdout /var/log/nginx/access.log && \
     ln -sfT /dev/stderr /var/log/nginx/error.log
 
-COPY default.conf /etc/nginx/conf.d/
+COPY default.conf /etc/nginx/http.d/
 COPY run.sh /
 
 CMD ["/fileenv", "/run.sh"]
